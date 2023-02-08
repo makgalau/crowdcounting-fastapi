@@ -1,7 +1,7 @@
 # main.py
 
 from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 
 app = FastAPI()
 
@@ -17,12 +17,12 @@ def upload(file: UploadFile = File(...)):
         contents = file.file.read()
         with open(file.filename, "wb") as f:
             f.write(contents)
+
+        return FileResponse(file.filename)
     except Exception:
         return {"message": "There was an error uploading the file"}
     finally:
         file.file.close()
-
-    return FileResponse(file.filename)
 
 
 @app.get("/")
