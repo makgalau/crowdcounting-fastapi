@@ -1,10 +1,23 @@
 # main.py
 
 from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 
-app = FastAPI()
+from time import sleep
 
+app = FastAPI()
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/live")
 async def livecheck():
@@ -13,12 +26,17 @@ async def livecheck():
 
 @app.post("/upload")
 def upload(file: UploadFile = File(...)):
+    print(file)
     try:
+        print(file)
         contents = file.file.read()
         with open(file.filename, "wb") as f:
             f.write(contents)
 
+        sleep(1)
+
         return FileResponse(file.filename)
+        # process content
     except Exception:
         return {"message": "There was an error uploading the file"}
     finally:
