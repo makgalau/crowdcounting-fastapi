@@ -1,10 +1,12 @@
 # main.py
 
+from typing import Union
+import os
+
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
-
-from time import sleep
+from p2pnet.infer import infer_p2pnet
 
 app = FastAPI()
 origins = [
@@ -19,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/live")
 async def livecheck():
     return {"message": "Hello World"}
@@ -26,20 +29,18 @@ async def livecheck():
 
 @app.post("/upload")
 def upload(file: UploadFile = File(...)):
-    print(file)
     try:
-        print(file)
         contents = file.file.read()
         with open(file.filename, "wb") as f:
             f.write(contents)
-
-        sleep(1)
-
-        return FileResponse(file.filename)
-        # process content
-    except Exception:
+            count = infer_p2pnet(file.filename)
+        return FileResponse(file.filename), {"message": "success", "count": count}
+    except Exception as e:
+        print(e)
         return {"message": "There was an error uploading the file"}
     finally:
+        os.remove(file.filename)
+        os.remove(f"p2pnet/logs/pred{count}.jpg")
         file.file.close()
 
 
