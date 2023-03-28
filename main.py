@@ -34,13 +34,12 @@ def upload(file: UploadFile = File(...)):
         with open(file.filename, "wb") as f:
             f.write(contents)
             count = infer_p2pnet(file.filename)
-        return FileResponse(file.filename), {"message": "success", "count": count}
+        return FileResponse(f"p2pnet/logs/pred{count}.jpg")
     except Exception as e:
         print(e)
         return {"message": "There was an error uploading the file"}
     finally:
         os.remove(file.filename)
-        os.remove(f"p2pnet/logs/pred{count}.jpg")
         file.file.close()
 
 
