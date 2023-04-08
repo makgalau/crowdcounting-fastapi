@@ -1,11 +1,13 @@
 # main.py
 
-from typing import Union
 import os
 
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
+from supabase import create_client
+
+import db
 from p2pnet.infer import infer_p2pnet
 
 app = FastAPI()
@@ -20,6 +22,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
 
 
 @app.get("/live")
@@ -28,12 +31,18 @@ async def livecheck():
 
 
 @app.post("/upload")
-def upload(file: UploadFile = File(...)):
+def upload(
+    datetime: str = Form(...),
+    gate: str = Form(...),
+    file: UploadFile = File(...),
+):
     try:
         contents = file.file.read()
         with open(file.filename, "wb") as f:
             f.write(contents)
             count = infer_p2pnet(file.filename)
+
+        db.insert(supabase, datetime=datetime, gate=gate, count=count)
         return FileResponse(f"p2pnet/logs/pred{count}.jpg")
     except Exception as e:
         print(e)
