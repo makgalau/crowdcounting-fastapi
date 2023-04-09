@@ -2,7 +2,7 @@ crowd_count_table = "crowd_count"
 
 
 def get(client):
-    data = client.table(crowd_count_table).select("*").execute()
+    data = client.table(crowd_count_table).select("*").order("created_at").execute()
     return data.data
 
 

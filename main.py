@@ -52,6 +52,16 @@ def upload(
         file.file.close()
 
 
+@app.get("/data")
+async def get_data():
+    try:
+        data = db.get(supabase)
+        return data
+    except Exception as e:
+        print(e)
+        return {"message": "There was an error uploading the file"}
+
+
 @app.get("/")
 async def main():
     content = """
