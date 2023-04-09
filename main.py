@@ -59,7 +59,17 @@ async def get_data():
         return data
     except Exception as e:
         print(e)
-        return {"message": "There was an error uploading the file"}
+        return {"message": "There was an error getting the data"}
+
+
+@app.delete("/delete/{id}")
+async def delete_record(id: int):
+    try:
+        db.delete(supabase, id)
+        return {"message": "success"}
+    except Exception as e:
+        print(e)
+        return {"message": "There was an error deleting the record"}
 
 
 @app.get("/")
